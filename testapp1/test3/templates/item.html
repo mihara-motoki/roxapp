@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>OCR</title>
+</head>
+<body>
+    <h1>amazon OCR</h1>
+
+    <form method="post" action="input" enctype="multipart/form-data">
+        <div></div>
+        <input type="file" name="file" multiple uk-tooltip="クリックしてファイルを選択してください"/>
+        <div></div><br>
+        <span class="upload-icon"><span uk-icon='icon: cloud-upload; ratio: 1.2'></span></span>                        
+        <input type="submit" value="submit">
+    </form>
+    {{ text }}
+    <div></div><br>
+    ↓
+    <div></div><br>
+    {{ text2 }}<br>
+    {{ text3 }}
+</body>
+
+</html>

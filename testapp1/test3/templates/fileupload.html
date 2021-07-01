@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}FileUpload{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+<!--
+<script src="{{ url_for('static', path='/js/ag-grid-community.min.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/ag-grid.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/ag-theme-blue.css') }}">
+-->
+<style>
+    .uk-form-custom{
+        color:deepskyblue;
+    }
+</style>
+<div class="uk-container">
+    <p>ファイルアップロードサンプル</p>
+    <div class="js-upload uk-placeholder uk-text-center uk-background-muted uk-padding-small">
+        <div class="uk-child-width-1-2" uk-grid>
+            <div>
+                <div class="uk-child-width-1-2" uk-grid>
+                    <div>
+                        <span>ファイル一覧</span>
+                    </div>
+                    <div></div>
+                </div>
+            </div>
+            <div class="uk-text-right">
+                <div uk-form-custom>
+                    <input id="file5" type="file" multiple uk-tooltip="クリックしてファイルを選択するか、ファイルをDrag&amp;Dropします"/>
+                    <span class="upload-icon"><span uk-icon='icon: cloud-upload; ratio: 1.2'></span></span>                        
+                </div>                    
+            </div>
+        </div>
+        <!-- ag-gridを表示する要素 -->
+        <div id="myGrid" style="height:300px;width:100%; " class="ag-theme-blue"></div>
+    </div>
+    <!-- progressbar -->
+    <progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
+    <script>
+        /*************************************
+          ag-gridを再描画する
+        **************************************/
+        function refresh_grid(){            
+            //ファイル一覧を取得する
+            agGrid.simpleHttpRequest({url: '/fileupload/filelist'}).then(function(data) {
+                //取得したファイル一覧をgridにセットする
+                gridOptions.api.setRowData(data);
+            });
+        }
+        /*************************************
+          ag-gridの列定義
+        **************************************/
+        var columnDefs = [
+            {headerName: "FileName", field: "filename", minWidth: 200, cellStyle: {"text-align": "left"},
+                cellRenderer : function(params){
+                    filename=params.data.filename;
+                    html="<a target='_blank' href='/filedownload/"+filename+"'>"+
+                        params.data.filename+
+                        "</a>"+
+                        ""
+                    return html
+                }
+            },
+            {headerName: "Size", field: "filesize", width: 120, cellStyle: {"text-align": "right"}},
+            {headerName: "Extention", field: "extention", width: 120},
+            {headerName: '', width: 80,
+                cellRenderer : function(params){
+                    html="<form action='/fileupload/deletefile' method='post'>"+
+                        "<input type='hidden' name='params' value='"+JSON.stringify(params.data)+"'/>"+
+                        "<button class='uk-button uk-button-link'>×</button>"+
+                        "</form>"+
+                        ""
+                    return html
+                }
+            }
+        ];
+        /*************************************
+          ag-gridのオプション
+        **************************************/
+        var gridOptions = {
+            columnDefs: columnDefs,
+        };
+        /*************************************
+          ag-gridを表示するdiv要素を取得して生成
+        **************************************/
+        var eGridDiv = document.querySelector('#myGrid');
+        new agGrid.Grid(eGridDiv, gridOptions);
+        refresh_grid();
+
+        /*************************************
+          UIkit-Upload
+        **************************************/
+        var bar = document.getElementById('js-progressbar');
+        UIkit.upload('.js-upload', {
+            url: '/fileupload',
+            method: 'post',
+            multiple: true,
+            error: function () {
+                console.log('error', arguments);
+            },
+            loadStart: function (e) {
+                bar.removeAttribute('hidden');
+                bar.max = e.total;
+                bar.value = e.loaded;
+            },
+            progress: function (e) {
+                bar.max = e.total;
+                bar.value = e.loaded;
+            },
+            loadEnd: function (e) {
+                bar.max = e.total;
+                bar.value = e.loaded;
+                refresh_grid();
+            },
+            completeAll: function () {
+                setTimeout(function () {
+                    bar.setAttribute('hidden', 'hidden');
+                }, 1000);
+            }
+        });
+    </script>       
+</div>
+
+{% endblock %}

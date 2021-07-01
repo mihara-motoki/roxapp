@@ -1,0 +1,113 @@
+【データ成形】
+読み込み（pd.read_excelでよい）
+ wb = openpyxl.load_workbook("予約.xlsx")
+ ws = wb.worksheets[0]
+ Data = ws.values
+ columns = next(Data)[0:]
+ data1 = df(Data, columns=columns)
+
+
+データ確認
+　行数・列数の確認　 df.shape
+　indexの確認　　　　df.index
+　columnの確認　 　　df.columns
+　データ型を確認　　　df.dtypes
+　ヘッド　　　　　　　df.head(数値)
+  数確認　　　　　　　df.colName.value_counts() (dropna=False)も出来る
+  summarise 　　　　agg
+               #df.agg({"year_1975":"mean","station":"count"})
+
+データ型変更
+　df["a"] = df["a"].fillna(0).astype("int64") naを0にした後、int64に変換
+
+カラム名変更
+　df.rename(columns={'y': 'sales'}, inplace=True)
+
+並べ替え
+　df.sort_values(by="sales", ascending=True).head() # ascending=Trueで昇順
+
+特定列取得
+　df(new) = df.iloc[[1：5,[5:10]]] allの時は":"のみ
+                                  :で範囲選択の時は、(開始):(終了+1)
+　
+列を追加
+ 新規列名を指定して追加 df["new列名"]　既存だと代入になる
+ 　　　　　　　　　　 　df['new列名'] = df['B'] + df['C'] 合計等
+ assign()メソッドで追加・代入
+ insert()メソッドで任意の位置に追加
+ concat()関数でSeries, DataFrameを横に連結
+
+ evalがmutateに近い
+  df.eval('new_column = year_1975 * 2')  #better
+
+ 日付処理
+ 　df['month'] = df['day'].apply(lambda x: x.month)　#datetimeが必要
+# data5["利用日"] = data5['利用日'].dt.strftime('%Y-%m-%d')
+# data5["予約受付日"] = data5['予約受付日'].dt.strftime('%Y-%m-%d')
+
+
+ 条件処理
+ 　df = df.query("宿泊単価 > 0")
+
+ オフセット
+ 　df >> mutate(lead1=lead(colName, i=1),lag2=lag(colName, i=2))
+
+ 合計等グルーピング
+ 　df.by(["列名","複数も可能"], as_index=False).sum()
+ 　　　　　　　　　　　　　　　　　　 #as_index=Falseはindexにしたく無い時
+
+ 【可視化】
+ ヒストグラム
+ 　plt.hist(df["列名"], bins=10)　　
+　 plt.title("タイトル", fontdict = {"fontproperties":font_prop})
+          #その他：range=(10,20)　範囲 ,cultivate=True 累積
+          
+　　　　　　　　　　　　　　　　　　　　
+
+ 折れ線
+   plt.plot(df["x軸"],df["y軸"])   
+　 plt.title("タイトル", fontdict = {"fontproperties":font_prop})
+   plt.xlabel("Xラベル", fontdict = {"fontproperties":font_prop})
+   plt.ylabel("Yラベル", fontdict = {"fontproperties":font_prop})
+   plt.show()
+        #その他：color ="red/blue/green/orange"
+        #点のマーカー（marker）・線の種類（linetype）・凡例表示のためのラベル（label）
+
+ 複数を配置
+ 　fig, axe = plt.subplots(2, 2) # 図を2行2列に分割
+ 　axe[0, 0].plot～～と全ての頭に付ける
+ 　plt.tight_layout()　#被らないようにする
+ 　plt.show()
+   ↓　推奨
+   flt.subplot(2,2,1) #2行2列の1番目のグラフ　これをそれぞれに付ける
+   plt.tight_layout()
+ 　plt.show()
+
+ ##作図参考
+
+#ステータスヒストグラム
+#plt.hist(data3["予約ステータス"], bins=10)
+#plt.title("予約ステータスhist", fontdict = {"fontproperties":font_prop})
+
+#単価ヒストグラム
+#plt.hist(data4["宿泊単価"], bins=10)
+#plt.title("宿泊単価hist", fontdict = {"fontproperties":font_prop})
+
+#単価散布図
+# ax = data4.plot(kind="scatter", x="利用日", y="基本金額")
+# ax.set_ylabel("宿泊単価", fontdict = {"fontproperties":font_prop})
+# ax.set_xlabel("利用日", fontdict = {"fontproperties":font_prop})
+# plt.title("宿泊単価散布図", fontdict = {"fontproperties":font_prop})
+# plt.show()
+
+#利用室数ヒストグラム
+# plt.hist(data6["利用室数"], bins=10)
+# plt.title("利用室数hist", fontdict = {"fontproperties":font_prop})
+# plt.show()
+
+#日次推移
+# plt.plot(data6["利用日"],data6["利用室数"])
+# plt.title("日次推移", fontdict = {"fontproperties":font_prop})
+# plt.xlabel("Date", fontdict = {"fontproperties":font_prop})
+# plt.ylabel("利用室数", fontdict = {"fontproperties":font_prop})
+# plt.show()
